@@ -26,9 +26,29 @@ public class AstronomySystem {
         celestialObjects.add(object);
     }
 
-    public void scheduleSession(Observer observer, Telescope telescope, CelestialObject target, String date, int startHour, int durationMinutes, String notes, int sessionId){
-        ObservationSession session = new ObservationSession(durationMinutes, date, notes, observer, sessionId, startHour, target, telescope);
+    public ObservationSession scheduleSession(Observer observer, Telescope telescope, CelestialObject target, String date, int startHour, int durationMinutes, String notes, int sessionId
+    ) {
+        ObservationSession session = new ObservationSession(sessionId, observer, telescope, target, date, startHour, durationMinutes, notes);
+
         session.conduct();
         sessions.add(session);
+
+        return session;
+    }
+
+    public ArrayList<CelestialObject> getCelestialObjects() {
+        return celestialObjects;
+    }
+
+    public ArrayList<Observer> getObservers() {
+        return observers;
+    }
+
+    public ArrayList<ObservationSession> getSessions() {
+        return sessions;
+    }
+
+    public ArrayList<Telescope> getTelescopes() {
+        return telescopes;
     }
 }

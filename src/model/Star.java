@@ -23,4 +23,11 @@ public class Star extends CelestialObject {
                 (isNebula ? "Lies within Nebula region" : "Does not lie within Nebula region");
     }
 
+    @Override
+    public String toString() {
+        return getName() +
+                " | Star | " +
+                "Mag: " + getMagnitude() +
+                " | Spectral: " + spectralClass;
+    }
 }

@@ -48,12 +48,9 @@ public class Telescope {
 
     @Override
     public String toString() {
-        return "Telescope{" +
-                "apertureSize=" + apertureSize +
-                ", telescopeID=" + telescopeID +
-                ", model='" + model + '\'' +
-                ", maxMagnification=" + maxMagnification +
-                ", isMotorized=" + isMotorized +
-                '}';
+        return model +
+                " | Aperture: " + apertureSize + "mm" +
+                " | Max Mag: " + maxMagnification +
+                " | Motorized: " + isMotorized;
     }
 }

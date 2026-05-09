@@ -22,4 +22,11 @@ public class Planet extends CelestialObject{
                 "\nNumber of Moons: "+numberOfMoons+ "\n"+
                 (hasRings? "Has rings": "No rings System");
     }
+
+    @Override
+    public String toString() {
+        return getName() +
+                " | Planet | Moons: " + numberOfMoons +
+                " | Rings: " + (hasRings ? "Yes" : "No");
+    }
 }

@@ -12,16 +12,15 @@ public class ObservationSession {
     private String status;
     private String failReason;
 
-    public ObservationSession(int durationMinutes, String date, String notes, Observer observer, int sessionId, int startHour, CelestialObject target, Telescope telescope) {
-        this.durationMinutes = durationMinutes;
-        this.date = date;
-        this.notes = notes;
-        this.observer = observer;
+    public ObservationSession(int sessionId, Observer observer, Telescope telescope, CelestialObject target, String date, int startHour, int durationMinutes, String notes){
         this.sessionId = sessionId;
-        this.startHour = startHour;
-        this.target = target;
+        this.observer = observer;
         this.telescope = telescope;
-    }
+        this.target = target;
+        this.date = date;
+        this.startHour = startHour;
+        this.durationMinutes = durationMinutes;
+        this.notes = notes;}
 
     public void conduct() {
         if (!target.isVisible(startHour)){
@@ -74,7 +73,7 @@ public class ObservationSession {
                 "\nDuration Minutes: " + durationMinutes +
                 "\nNotes: " + notes +
                 "\nStatus: " + status +
-                ((status.equals("FAILED")) ? "\nFail Reason: " + failReason : "");
+                (status.equals("FAILED") ? "\nFail Reason: " + failReason : "");
     }
 
     public String getLog(){

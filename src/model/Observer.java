@@ -47,9 +47,6 @@ public class Observer {
 
     @Override
     public String toString() {
-        return  "Observer ID: " + observerID +
-                "\nObserver Name: " + observerName +
-                "\nLocation: " + location +
-                "\nExperience Level: " + experienceLevel;
+        return observerName + " (" + experienceLevel + ") - " + location;
     }
 }

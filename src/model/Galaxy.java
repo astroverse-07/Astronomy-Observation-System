@@ -22,4 +22,11 @@ public class Galaxy extends CelestialObject{
                 "\nType: "+galaxyType+
                 "\nEstimated Stars: "+estimatedStars+" billions";
     }
+
+    @Override
+    public String toString() {
+        return getName() +
+                " | Galaxy (" + galaxyType + ")" +
+                " | Stars: " + estimatedStars;
+    }
 }
