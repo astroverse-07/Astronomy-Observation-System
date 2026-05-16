@@ -1,4 +1,4 @@
-package model;
+package backend.model;
 
 public class Galaxy extends CelestialObject{
     private String galaxyType;

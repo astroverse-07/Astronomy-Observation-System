@@ -1,4 +1,4 @@
-package model;
+package backend.model;
 
 public class Star extends CelestialObject {
     private String spectralClass;

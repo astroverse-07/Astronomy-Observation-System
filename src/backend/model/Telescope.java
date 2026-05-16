@@ -1,4 +1,4 @@
-package model;
+package backend.model;
 
 public class Telescope {
     private int telescopeID;

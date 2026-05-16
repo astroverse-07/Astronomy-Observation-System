@@ -1,7 +1,7 @@
-package view;
+package frontend.view;
 
-import controller.AstronomySystem;
-import model.*;
+import backend.controller.AstronomySystem;
+import backend.model.*;
 
 import java.util.Scanner;
 
@@ -17,7 +17,10 @@ public class MainMenu {
             System.out.println("3. Add Celestial Object");
             System.out.println("4. Schedule Session");
             System.out.println("5. View Session");
-            System.out.println("6. Exit");
+            System.out.println("6. View Observers");
+            System.out.println("7. View Telescopes");
+            System.out.println("8. View Celestial Objects");
+            System.out.println("9. Exit");
 
             int choice = sc.nextInt();
 
@@ -178,7 +181,46 @@ public class MainMenu {
                     }
                 }
             }
-            else if (choice==6){
+            else if (choice == 6) {
+
+                System.out.println("\n==== Observers ====");
+
+                if (system.getObservers().isEmpty()) {
+                    System.out.println("No observers found.");
+                }
+                else {
+                    for (int i = 0; i < system.getObservers().size(); i++) {
+                        System.out.println((i + 1) + ". " + system.getObservers().get(i));
+                    }
+                }
+            }
+            else if (choice == 7) {
+
+                System.out.println("\n==== Telescopes ====");
+
+                if (system.getTelescopes().isEmpty()) {
+                    System.out.println("No telescopes found.");
+                }
+                else {
+                    for (int i = 0; i < system.getTelescopes().size(); i++) {
+                        System.out.println((i + 1) + ". " + system.getTelescopes().get(i));
+                    }
+                }
+            }
+            else if (choice == 8) {
+
+                System.out.println("\n==== Celestial Objects ====");
+
+                if (system.getCelestialObjects().isEmpty()) {
+                    System.out.println("No celestial objects found.");
+                }
+                else {
+                    for (int i = 0; i < system.getCelestialObjects().size(); i++) {
+                        System.out.println((i + 1) + ". " + system.getCelestialObjects().get(i));
+                    }
+                }
+            }
+            else if (choice==9){
                 flag = false;
                 System.out.println("==== System Exited Successfully! ====");
             }

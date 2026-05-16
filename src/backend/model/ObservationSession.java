@@ -1,4 +1,4 @@
-package model;
+package backend.model;
 
 public class ObservationSession {
     private int sessionId;

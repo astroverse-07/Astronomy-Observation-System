@@ -1,4 +1,4 @@
-package model;
+package backend.model;
 
 public abstract class CelestialObject {
     private String name;
@@ -26,7 +26,7 @@ public abstract class CelestialObject {
     };
 
     public boolean isVisible(int hour) {
-        if (hour<0 || hour>24){
+        if (hour<0 || hour>23){
             System.out.println("Hours must be between 0-24");
         }
         return hour >= 20 || hour <= 5;

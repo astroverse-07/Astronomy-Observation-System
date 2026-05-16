@@ -1,9 +1,9 @@
-package controller;
+package backend.controller;
 
-import model.CelestialObject;
-import model.ObservationSession;
-import model.Observer;
-import model.Telescope;
+import backend.model.CelestialObject;
+import backend.model.ObservationSession;
+import backend.model.Observer;
+import backend.model.Telescope;
 
 import java.util.ArrayList;
 

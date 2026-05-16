@@ -1,4 +1,4 @@
-package model;
+package backend.model;
 
 public class Planet extends CelestialObject{
     private int numberOfMoons;
@@ -18,7 +18,7 @@ public class Planet extends CelestialObject{
     @Override
     public String getDescription() {
         return  "Name: "+getName()+
-                "Constellation: "+getConstellation()+
+                "\nConstellation: "+getConstellation()+
                 "\nNumber of Moons: "+numberOfMoons+ "\n"+
                 (hasRings? "Has rings": "No rings System");
     }
