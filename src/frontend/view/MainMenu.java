@@ -1,8 +1,10 @@
 package frontend.view;
 
 import backend.controller.AstronomySystem;
+import backend.filehandler.ObservationLog;
 import backend.model.*;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class MainMenu {
@@ -20,7 +22,8 @@ public class MainMenu {
             System.out.println("6. View Observers");
             System.out.println("7. View Telescopes");
             System.out.println("8. View Celestial Objects");
-            System.out.println("9. Exit");
+            System.out.println("9. Logs");
+            System.out.println("10. Exit");
 
             int choice = sc.nextInt();
 
@@ -140,7 +143,6 @@ public class MainMenu {
                 String date = sc.nextLine();
                 System.out.print("Enter Start Hour: ");
                 int startHour = sc.nextInt();
-                sc.nextLine();
                 System.out.print("Enter Duration (In Minutes): ");
                 int duration = sc.nextInt();
                 sc.nextLine();
@@ -152,10 +154,7 @@ public class MainMenu {
                 System.out.println("\n===== Session Result =====");
                 System.out.println(session);
 
-                if ("FAILED".equals(session.getStatus())) {
-                    //System.out.println("Reason: " + session.getFailReason());
-                }
-                else {
+                if ("SUCCESS".equals(session.getStatus())) {
                     System.out.println("Observation SUCCESSFUL");
                 }
             }
@@ -220,7 +219,114 @@ public class MainMenu {
                     }
                 }
             }
-            else if (choice==9){
+            else if (choice == 9) {
+
+                boolean logMenu = true;
+
+                while (logMenu) {
+
+                    System.out.println("\n==== Logs Menu ====");
+                    System.out.println("1. View All Logs");
+                    System.out.println("2. Search by Observer");
+                    System.out.println("3. Search by Object");
+                    System.out.println("4. Filter by Status (SUCCESS/FAILED)");
+                    System.out.println("5. Clear Logs");
+                    System.out.println("6. Back To Main Menu");
+                    System.out.print("Enter Choice: ");
+
+                    int logChoice = sc.nextInt();
+                    sc.nextLine();
+
+                    if (logChoice == 1) {
+
+                        ArrayList<String> logs = ObservationLog.loadAllSessions();
+
+                        if (logs.isEmpty()) {
+                            System.out.println("No logs found.");
+                        }
+                        else {
+                            System.out.println("\n==== All Logs ====");
+
+                            for (String log : logs) {
+                                System.out.println(log);
+                            }
+                        }
+                    }
+
+                    else if (logChoice == 2) {
+
+                        System.out.print("Enter Observer Name: ");
+                        String name = sc.nextLine();
+
+                        ArrayList<String> results = ObservationLog.searchByObserver(name);
+
+                        if (results.isEmpty()) {
+                            System.out.println("No logs found for: " + name);
+                        }
+                        else {
+                            System.out.println("\n==== Results ====");
+
+                            for (String log : results) {
+                                System.out.println(log);
+                            }
+                        }
+                    }
+
+                    else if (logChoice == 3) {
+
+                        System.out.print("Enter Object Name: ");
+                        String objectName = sc.nextLine();
+
+                        ArrayList<String> results = ObservationLog.searchByObject(objectName);
+
+                        if (results.isEmpty()) {
+                            System.out.println("No logs found for: " + objectName);
+                        }
+                        else {
+                            System.out.println("\n==== Results ====");
+
+                            for (String log : results) {
+                                System.out.println(log);
+                            }
+                        }
+                    }
+
+                    else if (logChoice == 4) {
+
+                        System.out.print("Enter Status (SUCCESS/FAILED): ");
+                        String status = sc.nextLine();
+
+                        ArrayList<String> results = ObservationLog.filterByStatus(status);
+
+                        if (results.isEmpty()) {
+                            System.out.println("No logs found with status: " + status);
+                        }
+                        else {
+                            System.out.println("\n==== Results ====");
+
+                            for (String log : results) {
+                                System.out.println(log);
+                            }
+                        }
+                    }
+
+                    else if (logChoice == 5) {
+
+                        ObservationLog.clearLogs();
+                    }
+
+                    else if (logChoice == 6) {
+
+                        logMenu = false;
+                    }
+
+                    else {
+
+                        System.out.println("Invalid Choice!");
+                    }
+                }
+            }
+            else if (choice==10){
                 flag = false;
                 System.out.println("==== System Exited Successfully! ====");
             }

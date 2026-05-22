@@ -1,9 +1,12 @@
 package backend.controller;
 
+import backend.filehandler.ObservationLog;
 import backend.model.CelestialObject;
 import backend.model.ObservationSession;
 import backend.model.Observer;
 import backend.model.Telescope;
+import backend.filehandler.ObservationLog;
+import java.util.ArrayList;
 
 import java.util.ArrayList;
 
@@ -13,6 +16,17 @@ public class AstronomySystem {
     private ArrayList<Telescope> telescopes = new ArrayList<>();
     private ArrayList<CelestialObject> celestialObjects = new ArrayList<>();
     private ArrayList<ObservationSession> sessions = new ArrayList<>();
+
+    public AstronomySystem() {
+        System.out.println("Loading previous logs...");
+        ArrayList<String> logs = ObservationLog.loadAllSessions();
+        if (logs.isEmpty()) {
+            System.out.println("No previous logs found.");
+        }
+        else {
+            System.out.println("Loaded " + logs.size() + " previous session log(s).");
+        }
+    }
 
     public void addObserver(Observer observer){
         observers.add(observer);
@@ -31,6 +45,7 @@ public class AstronomySystem {
         ObservationSession session = new ObservationSession(sessionId, observer, telescope, target, date, startHour, durationMinutes, notes);
 
         session.conduct();
+        ObservationLog.saveSession(session);
         sessions.add(session);
 
         return session;
