@@ -1,5 +1,7 @@
 package backend.model;
 
+import backend.exception.InvalidDataException;
+
 public class ObservationSession {
     private int sessionId;
     private Observer observer;
@@ -20,20 +22,37 @@ public class ObservationSession {
         this.date = date;
         this.startHour = startHour;
         this.durationMinutes = durationMinutes;
-        this.notes = notes;}
+        this.notes = notes;
+        this.status = "PENDING";
+    }
 
     public void conduct() {
-        if (!target.isVisible(startHour)){
+        try {
+            if (!target.isVisible(startHour)) {
+                status = "FAILED";
+                failReason = "Target not visible at this hour";
+            }
+            else if (!telescope.canObserve(target)) {
+                status = "FAILED";
+                failReason = "Telescope aperture too weak for faint magnitude";
+            }
+            // SMART RULE 1: Duration check to prevent fatigue or daylight cross
+            else if (durationMinutes > 480) {
+                status = "FAILED";
+                failReason = "Exceeds maximum session length limits (8 hours)";
+            }
+            // SMART RULE 2: High complexity deep-sky tracking checks
+            else if (target.getType().equals("Galaxy") && !telescope.isMotorized() && observer.getExperienceLevel().equalsIgnoreCase("Beginner")) {
+                status = "FAILED";
+                failReason = "Beginners require a Motorized Telescope to track high-complexity Galaxy structures";
+            }
+            else {
+                status = "SUCCESS";
+                failReason = "";
+            }
+        } catch (InvalidDataException e) {
             status = "FAILED";
-            failReason = "Not visible at this hour";
-        }
-        else if (!telescope.canObserve(target)){
-            status = "FAILED";
-            failReason = "Telescope too weak";
-        }
-        else {
-            status = "SUCCESS";
-            failReason = null;
+            failReason = e.getMessage();
         }
     }
 
@@ -60,6 +79,8 @@ public class ObservationSession {
     public int getSessionId() {
         return sessionId;
     }
+
+    public String getDate() { return date; }
 
     @Override
     public String toString() {

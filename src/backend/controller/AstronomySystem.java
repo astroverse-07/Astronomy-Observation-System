@@ -5,9 +5,6 @@ import backend.model.CelestialObject;
 import backend.model.ObservationSession;
 import backend.model.Observer;
 import backend.model.Telescope;
-import backend.filehandler.ObservationLog;
-import java.util.ArrayList;
-
 import java.util.ArrayList;
 
 public class AstronomySystem {
@@ -43,11 +40,9 @@ public class AstronomySystem {
     public ObservationSession scheduleSession(Observer observer, Telescope telescope, CelestialObject target, String date, int startHour, int durationMinutes, String notes, int sessionId
     ) {
         ObservationSession session = new ObservationSession(sessionId, observer, telescope, target, date, startHour, durationMinutes, notes);
-
         session.conduct();
         ObservationLog.saveSession(session);
         sessions.add(session);
-
         return session;
     }
 

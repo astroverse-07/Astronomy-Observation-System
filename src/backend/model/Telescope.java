@@ -1,5 +1,7 @@
 package backend.model;
 
+import backend.exception.InvalidDataException;
+
 public class Telescope {
     private int telescopeID;
     private String model;
@@ -7,7 +9,13 @@ public class Telescope {
     private int maxMagnification;
     private boolean isMotorized;
 
-    public Telescope(int telescopeID, String model, int maxMagnification, double apertureSize, boolean isMotorized) {
+    public Telescope(int telescopeID, String model, int maxMagnification, double apertureSize, boolean isMotorized) throws InvalidDataException {
+        if (model == null || model.trim().isEmpty()) {
+            throw new InvalidDataException("Telescope model cannot be empty!");
+        }
+        if (apertureSize <= 0 || maxMagnification <= 0) {
+            throw new InvalidDataException("Aperture and Magnification metrics must be positive numbers!");
+        }
         this.telescopeID = telescopeID;
         this.model = model;
         this.maxMagnification = maxMagnification;

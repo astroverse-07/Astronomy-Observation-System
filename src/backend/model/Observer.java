@@ -1,16 +1,25 @@
 package backend.model;
 
+import backend.exception.InvalidDataException;
+
 public class Observer {
     private int observerID;
     private String observerName;
     private String experienceLevel;
     private String location;
 
-    public Observer(int observerID, String observerName, String location, String experienceLevel) {
+    public Observer(int observerID, String observerName, String experienceLevel, String location) throws InvalidDataException {
+        if (observerName == null || observerName.trim().isEmpty()) {
+            throw new InvalidDataException("Observer name cannot be empty!");
+        }
+        String exp = experienceLevel.trim().toLowerCase();
+        if (!exp.equals("beginner") && !exp.equals("intermediate") && !exp.equals("expert")) {
+            throw new InvalidDataException("Experience Level must be 'Beginner', 'Intermediate', or 'Expert'!");
+        }
         this.observerID = observerID;
         this.observerName = observerName;
-        this.location = location;
         this.experienceLevel = experienceLevel;
+        this.location = location;
     }
 
     public String getObserverName() {

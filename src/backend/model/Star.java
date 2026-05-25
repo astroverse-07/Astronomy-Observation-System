@@ -1,10 +1,12 @@
 package backend.model;
 
+import backend.exception.InvalidDataException;
+
 public class Star extends CelestialObject {
     private String spectralClass;
     private boolean isNebula;
 
-    public Star(String name, int lightYears, double magnitude, int rightAscension, int declination, String constellation, boolean isNebula, String spectralClass) {
+    public Star(String name, int lightYears, double magnitude, int rightAscension, int declination, String constellation, boolean isNebula, String spectralClass) throws InvalidDataException {
         super(name, lightYears, magnitude, rightAscension, declination, constellation);
         this.isNebula = isNebula;
         this.spectralClass = spectralClass;
