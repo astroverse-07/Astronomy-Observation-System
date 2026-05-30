@@ -13,8 +13,10 @@ public class Observer {
             throw new InvalidDataException("Observer name cannot be empty!");
         }
         String exp = experienceLevel.trim().toLowerCase();
-        if (!exp.equals("beginner") && !exp.equals("intermediate") && !exp.equals("expert")) {
-            throw new InvalidDataException("Experience Level must be 'Beginner', 'Intermediate', or 'Expert'!");
+        if (!experienceLevel.equalsIgnoreCase("Beginner") &&
+                !experienceLevel.equalsIgnoreCase("Intermediate") &&
+                !experienceLevel.equalsIgnoreCase("Expert")) {
+            throw new InvalidDataException("Experience Level must be 'Beginner', 'Intermediate', or 'Expert'");
         }
         this.observerID = observerID;
         this.observerName = observerName;
