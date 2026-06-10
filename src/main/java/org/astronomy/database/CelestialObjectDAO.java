@@ -1,7 +1,7 @@
-package backend.database;
+package org.astronomy.database;
 
-import backend.exception.InvalidDataException;
-import backend.model.*;
+import org.astronomy.exception.InvalidDataException;
+import org.astronomy.model.*;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -20,7 +20,6 @@ public class CelestialObjectDAO {
             stmt.setString(4, obj.getConstellation());
             stmt.setString(5, obj.getType());
 
-            // Default column fields values null mappings setup
             stmt.setNull(6, Types.VARCHAR);
             stmt.setNull(7, Types.BOOLEAN);
             stmt.setNull(8, Types.INTEGER);
@@ -29,7 +28,6 @@ public class CelestialObjectDAO {
             stmt.setNull(11, Types.INTEGER);
 
             if (obj instanceof Star) {
-                // Cast tracking fallback variables details mapping
                 stmt.setString(6, "G");
                 stmt.setBoolean(7, false);
             } else if (obj instanceof Planet) {
@@ -57,23 +55,56 @@ public class CelestialObjectDAO {
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
-                String type = rs.getString("object_type");
-                String name = rs.getString("name");
-                int ly = rs.getInt("light_years");
-                double mag = rs.getDouble("magnitude");
-                String con = rs.getString("constellation");
-
-                if ("Star".equalsIgnoreCase(type)) {
-                    list.add(new Star(name, ly, mag, 0, 0, con, false, "G"));
-                } else if ("Planet".equalsIgnoreCase(type)) {
-                    list.add(new Planet(name, ly, mag, 0, 0, con, 0, false));
-                } else if ("Galaxy".equalsIgnoreCase(type)) {
-                    list.add(new Galaxy(name, ly, mag, 0, 0, con, "Spiral", 100));
-                }
+                CelestialObject obj = mapRow(rs);
+                if (obj != null) list.add(obj);
             }
-        } catch (SQLException | InvalidDataException e) {
+        } catch (SQLException e) {
             System.out.println("[DB ERROR] Objects loading issue: " + e.getMessage());
         }
         return list;
+    }
+
+    public static CelestialObject loadByName(String name) {
+        String sql = "SELECT * FROM celestial_objects WHERE name = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, name);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return mapRow(rs);
+            }
+        } catch (SQLException e) {
+            System.out.println("[DB ERROR] CelestialObject loadByName: " + e.getMessage());
+        }
+        return null;
+    }
+
+    private static CelestialObject mapRow(ResultSet rs) {
+        try {
+            String type = rs.getString("object_type");
+            String name = rs.getString("name");
+            int ly = rs.getInt("light_years");
+            double mag = rs.getDouble("magnitude");
+            int ra = rs.getInt("right_ascension");
+            int dec = rs.getInt("declination");
+            String con = rs.getString("constellation");
+
+            if ("Star".equalsIgnoreCase(type)) {
+                String spectral = rs.getString("spectral_class");
+                boolean isNebula = rs.getBoolean("is_nebula");
+                return new Star(name, ly, mag, ra, dec, con, isNebula, spectral != null ? spectral : "G");
+            } else if ("Planet".equalsIgnoreCase(type)) {
+                int moons = rs.getInt("number_of_moons");
+                boolean hasRings = rs.getBoolean("has_rings");
+                return new Planet(name, ly, mag, ra, dec, con, moons, hasRings);
+            } else if ("Galaxy".equalsIgnoreCase(type)) {
+                String galaxyType = rs.getString("galaxy_type");
+                int stars = rs.getInt("estimated_stars");
+                return new Galaxy(name, ly, mag, ra, dec, con, galaxyType != null ? galaxyType : "Spiral", stars);
+            }
+        } catch (SQLException | InvalidDataException e) {
+            System.out.println("[DB ERROR] Row mapping issue: " + e.getMessage());
+        }
+        return null;
     }
 }

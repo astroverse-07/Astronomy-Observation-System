@@ -1,13 +1,16 @@
-package backend.controller;
+package org.astronomy.service;
 
-import backend.filehandler.ObservationLog;
-import backend.database.*; // All DAO classes import karne ke liye
-import backend.model.CelestialObject;
-import backend.model.ObservationSession;
-import backend.model.Observer;
-import backend.model.Telescope;
+import org.astronomy.filehandler.ObservationLog;
+import org.astronomy.database.*; // All DAO classes import karne ke liye
+import org.astronomy.model.CelestialObject;
+import org.astronomy.model.ObservationSession;
+import org.astronomy.model.Observer;
+import org.astronomy.model.Telescope;
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 
+@Component
 public class AstronomySystem {
 
     private ArrayList<Observer> observers = new ArrayList<>();
@@ -28,6 +31,8 @@ public class AstronomySystem {
             if (dbObservers != null) this.observers = dbObservers;
             if (dbTelescopes != null) this.telescopes = dbTelescopes;
             if (dbObjects != null) this.celestialObjects = dbObjects;
+            ArrayList<ObservationSession> dbSessions = SessionDAO.loadAll();
+            if (dbSessions != null) this.sessions = dbSessions;
 
             System.out.println("Database records mapping check: Success.");
         } catch (Exception e) {

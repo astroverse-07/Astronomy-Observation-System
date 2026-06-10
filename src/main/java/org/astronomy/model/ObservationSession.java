@@ -1,6 +1,6 @@
-package backend.model;
+package org.astronomy.model;
 
-import backend.exception.InvalidDataException;
+import org.astronomy.exception.InvalidDataException;
 
 public class ObservationSession {
     private int sessionId;
@@ -24,6 +24,7 @@ public class ObservationSession {
         this.durationMinutes = durationMinutes;
         this.notes = notes;
         this.status = "PENDING";
+        this.failReason = "";
     }
 
     public void conduct() {
@@ -99,5 +100,13 @@ public class ObservationSession {
 
     public String getLog(){
         return getSessionId()+ " | " +getObserver().getObserverName()+ " | " +getTelescope().getModel()+ " | " +getTarget().getName()+ " | " +startHour+ " | " +durationMinutes+ " | " +notes+ " | " +status+ " | " +((status.equals("FAILED")) ? failReason : "");
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setFailReason(String failReason) {
+        this.failReason = failReason;
     }
 }

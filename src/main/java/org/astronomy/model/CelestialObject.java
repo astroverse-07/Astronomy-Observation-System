@@ -1,11 +1,20 @@
-package backend.model;
+package org.astronomy.model;
 
-import backend.exception.InvalidDataException;
+import org.astronomy.exception.InvalidDataException;
 
 public abstract class CelestialObject {
     private String name;
     private int lightYears;
     private double magnitude;
+
+    public int getDeclination() {
+        return declination;
+    }
+
+    public int getRightAscension() {
+        return rightAscension;
+    }
+
     private int rightAscension;
     private int declination;
     private String constellation;

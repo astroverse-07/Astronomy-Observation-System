@@ -1,7 +1,7 @@
-package backend.database;
+package org.astronomy.database;
 
-import backend.exception.InvalidDataException;
-import backend.model.Observer;
+import org.astronomy.exception.InvalidDataException;
+import org.astronomy.model.Observer;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -35,13 +35,38 @@ public class ObserverDAO {
                 list.add(new Observer(
                         rs.getInt("observer_id"),
                         rs.getString("observer_name"),
-                        rs.getString("location"),
-                        rs.getString("experience_level")
+                        capitalizeFirst(rs.getString("experience_level")),
+                        rs.getString("location")
                 ));
             }
         } catch (SQLException | InvalidDataException e) {
             System.out.println("[DB ERROR] Observers loading issue: " + e.getMessage());
         }
         return list;
+    }
+
+    public static Observer loadById(int id) {
+        String sql = "SELECT * FROM observers WHERE observer_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return new Observer(
+                        rs.getInt("observer_id"),
+                        rs.getString("observer_name"),
+                        capitalizeFirst(rs.getString("experience_level")),
+                        rs.getString("location")
+                );
+            }
+        } catch (SQLException | InvalidDataException e) {
+            System.out.println("[DB ERROR] Observer loadById: " + e.getMessage());
+        }
+        return null;
+    }
+
+    private static String capitalizeFirst(String s) {
+        if (s == null || s.isEmpty()) return s;
+        return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
     }
 }

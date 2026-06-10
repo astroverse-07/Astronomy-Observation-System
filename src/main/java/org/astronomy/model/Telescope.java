@@ -1,6 +1,6 @@
-package backend.model;
+package org.astronomy.model;
 
-import backend.exception.InvalidDataException;
+import org.astronomy.exception.InvalidDataException;
 
 public class Telescope {
     private int telescopeID;

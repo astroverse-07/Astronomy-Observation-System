@@ -1,6 +1,6 @@
-package backend.model;
+package org.astronomy.model;
 
-import backend.exception.InvalidDataException;
+import org.astronomy.exception.InvalidDataException;
 
 public class Star extends CelestialObject {
     private String spectralClass;
@@ -10,6 +10,14 @@ public class Star extends CelestialObject {
         super(name, lightYears, magnitude, rightAscension, declination, constellation);
         this.isNebula = isNebula;
         this.spectralClass = spectralClass;
+    }
+
+    public boolean isNebula() {
+        return isNebula;
+    }
+
+    public String getSpectralClass() {
+        return spectralClass;
     }
 
     @Override

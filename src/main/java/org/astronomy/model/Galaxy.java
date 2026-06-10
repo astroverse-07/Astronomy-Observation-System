@@ -1,10 +1,18 @@
-package backend.model;
+package org.astronomy.model;
 
-import backend.exception.InvalidDataException;
+import org.astronomy.exception.InvalidDataException;
 
 public class Galaxy extends CelestialObject{
     private String galaxyType;
     private int estimatedStars;
+
+    public int getEstimatedStars() {
+        return estimatedStars;
+    }
+
+    public String getGalaxyType() {
+        return galaxyType;
+    }
 
     public Galaxy(String name, int lightYears, double magnitude, int rightAscension, int declination, String constellation, String galaxyType, int estimatedStars) throws InvalidDataException {
         super(name, lightYears, magnitude, rightAscension, declination, constellation);

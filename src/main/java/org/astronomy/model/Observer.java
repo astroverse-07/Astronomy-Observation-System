@@ -1,6 +1,6 @@
-package backend.model;
+package org.astronomy.model;
 
-import backend.exception.InvalidDataException;
+import org.astronomy.exception.InvalidDataException;
 
 public class Observer {
     private int observerID;
@@ -12,15 +12,15 @@ public class Observer {
         if (observerName == null || observerName.trim().isEmpty()) {
             throw new InvalidDataException("Observer name cannot be empty!");
         }
-        String exp = experienceLevel.trim().toLowerCase();
-        if (!experienceLevel.equalsIgnoreCase("Beginner") &&
-                !experienceLevel.equalsIgnoreCase("Intermediate") &&
-                !experienceLevel.equalsIgnoreCase("Expert")) {
+        String exp = experienceLevel.trim();
+        if (!exp.equalsIgnoreCase("Beginner") &&
+                !exp.equalsIgnoreCase("Intermediate") &&
+                !exp.equalsIgnoreCase("Expert")) {
             throw new InvalidDataException("Experience Level must be 'Beginner', 'Intermediate', or 'Expert'");
         }
         this.observerID = observerID;
         this.observerName = observerName;
-        this.experienceLevel = experienceLevel;
+        this.experienceLevel = exp.substring(0, 1).toUpperCase() + exp.substring(1).toLowerCase();
         this.location = location;
     }
 

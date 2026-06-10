@@ -1,7 +1,7 @@
-package backend.database;
+package org.astronomy.database;
 
-import backend.exception.InvalidDataException;
-import backend.model.Telescope;
+import org.astronomy.exception.InvalidDataException;
+import org.astronomy.model.Telescope;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -46,5 +46,26 @@ public class TelescopeDAO {
             System.out.println("[DB ERROR] Telescopes loading issue: " + e.getMessage());
         }
         return list;
+    }
+
+    public static Telescope loadById(int id) {
+        String sql = "SELECT * FROM telescopes WHERE telescope_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return new Telescope(
+                        rs.getInt("telescope_id"),
+                        rs.getString("model"),
+                        rs.getInt("max_magnification"),
+                        rs.getDouble("aperture_size"),
+                        rs.getBoolean("motorized")
+                );
+            }
+        } catch (SQLException | InvalidDataException e) {
+            System.out.println("[DB ERROR] Telescope loadById: " + e.getMessage());
+        }
+        return null;
     }
 }

@@ -1,6 +1,6 @@
-package backend.filehandler;
+package org.astronomy.filehandler;
 
-import backend.model.ObservationSession;
+import org.astronomy.model.ObservationSession;
 
 import java.io.*;
 import java.util.ArrayList;

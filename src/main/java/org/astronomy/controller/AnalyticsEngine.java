@@ -1,6 +1,6 @@
-package backend.controller;
+package org.astronomy.controller;
 
-import backend.model.ObservationSession;
+import org.astronomy.model.ObservationSession;
 import java.util.ArrayList;
 
 public class AnalyticsEngine {

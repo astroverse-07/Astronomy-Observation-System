@@ -1,10 +1,10 @@
-package frontend.view;
+package org.astronomy.frontend.view;
 
-import backend.controller.AstronomySystem;
-import backend.controller.AnalyticsEngine;
-import backend.filehandler.ObservationLog;
-import backend.model.*;
-import backend.exception.InvalidDataException;
+import org.astronomy.service.AstronomySystem;
+import org.astronomy.controller.AnalyticsEngine;
+import org.astronomy.filehandler.ObservationLog;
+import org.astronomy.model.*;
+import org.astronomy.exception.InvalidDataException;
 
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -119,7 +119,7 @@ public class MainMenu {
                         if (object != null) {
                             system.addCelestialObject(object);
                         }
-                    } catch (backend.exception.InvalidDataException e) {
+                    } catch (org.astronomy.exception.InvalidDataException e) {
                         System.out.println("\n[VALIDATION ERROR] " + e.getMessage());
                         System.out.println("Returning to Main Menu...");
                     }
