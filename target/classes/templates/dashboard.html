@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AOMS · Observatory Command Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================================
+           AOMS — DESIGN TOKENS
+           ============================================================ */
+        :root {
+            --bg: #0f1724;
+            --bg-deep: #0b1019;
+            --surface: #162033;
+            --surface-2: #1b2740;
+            --glass: rgba(255, 255, 255, 0.06);
+            --glass-strong: rgba(255, 255, 255, 0.09);
+            --border: rgba(255, 255, 255, 0.08);
+            --border-strong: rgba(255, 255, 255, 0.16);
+            --blue: #3bb8ff;
+            --green: #00d68f;
+            --amber: #ffb547;
+            --purple: #b18cff;
+            --red: #ff6b6b;
+            --text: #f5f7fa;
+            --text-dim: #b8c2d1;
+            --text-faint: #7d8aa0;
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+            --radius: 16px;
+            --radius-sm: 10px;
+            --shadow: 0 18px 50px rgba(5, 9, 16, 0.55);
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* ============================================================
+           BASE LAYOUT
+           ============================================================ */
+        body {
+            font-family: var(--font);
+            background-color: var(--bg);
+            background-image:
+                radial-gradient(ellipse at 18% -8%, rgba(59, 184, 255, 0.10), transparent 55%),
+                radial-gradient(ellipse at 88% 0%, rgba(0, 214, 143, 0.07), transparent 48%),
+                linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+            line-height: 1.5;
+        }
+
+        #star-canvas {
+            position: fixed; inset: 0; width: 100%; height: 100%;
+            z-index: 0; pointer-events: none; opacity: 0.65;
+        }
+
+        .main-wrapper {
+            position: relative; z-index: 2;
+            display: flex; flex-direction: column; min-height: 100vh;
+            animation: pageFade 0.7s ease both;
+        }
+
+        /* ============================================================
+           TOP NAVIGATION (glass, fixed)
+           ============================================================ */
+        .topbar {
+            position: sticky; top: 0; z-index: 40;
+            background: rgba(15, 23, 36, 0.72);
+            backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+            border-bottom: 1px solid var(--border);
+        }
+        .topbar-inner {
+            max-width: 1640px; margin: 0 auto;
+            padding: 14px 40px;
+            display: flex; align-items: center; justify-content: space-between; gap: 24px;
+        }
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .brand-mark {
+            width: 38px; height: 38px; border-radius: 11px;
+            display: grid; place-items: center; flex: none;
+            background: linear-gradient(135deg, var(--blue), var(--green));
+            box-shadow: 0 6px 18px rgba(59, 184, 255, 0.35);
+        }
+        .brand-mark svg { width: 20px; height: 20px; }
+        .brand-text b { font-size: 1.02rem; font-weight: 700; letter-spacing: 0.3px; color: var(--text); display: block; line-height: 1.1; }
+        .brand-text span { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 1.6px; text-transform: uppercase; color: var(--text-faint); }
+
+        .nav-links { display: flex; align-items: center; gap: 6px; }
+        .nav-links a {
+            color: var(--text-faint); text-decoration: none;
+            font-size: 0.82rem; font-weight: 500; letter-spacing: 0.2px;
+            padding: 9px 14px; border-radius: var(--radius-sm);
+            position: relative; transition: color 0.22s ease, background 0.22s ease; white-space: nowrap;
+            display: inline-flex; align-items: center; gap: 7px;
+        }
+        .nav-links a svg { width: 15px; height: 15px; flex: none; opacity: 0.7; transition: opacity 0.22s ease; }
+        .nav-links a:hover svg, .nav-links a.active svg { opacity: 1; }
+        .nav-links a::after {
+            content: ""; position: absolute; left: 14px; right: 14px; bottom: 4px; height: 2px;
+            background: var(--blue); border-radius: 2px;
+            transform: scaleX(0); transform-origin: left; transition: transform 0.28s ease;
+        }
+        .nav-links a:hover { color: var(--text); background: var(--glass); }
+        .nav-links a:hover::after { transform: scaleX(1); }
+        .nav-links a.active { color: var(--blue); }
+        .nav-links a.active::after { transform: scaleX(1); box-shadow: 0 0 10px rgba(59, 184, 255, 0.6); }
+
+        .status-pill {
+            font-family: var(--mono); font-size: 0.68rem; color: var(--green);
+            display: flex; align-items: center; gap: 9px;
+            border: 1px solid rgba(0, 214, 143, 0.3); padding: 7px 13px;
+            background: rgba(0, 214, 143, 0.06); letter-spacing: 0.8px; border-radius: 999px;
+            white-space: nowrap;
+        }
+        .pulse-dot {
+            width: 7px; height: 7px; background: var(--green); border-radius: 50%;
+            box-shadow: 0 0 8px var(--green); animation: pulse 1.9s infinite ease-in-out;
+        }
+        .sys-time { font-family: var(--mono); font-size: 0.7rem; color: var(--text-faint); letter-spacing: 0.6px; }
+
+        .menu-toggle { display: none; background: var(--glass); border: 1px solid var(--border); color: var(--text); width: 40px; height: 40px; border-radius: var(--radius-sm); cursor: pointer; }
+
+        /* ============================================================
+           CONTAINER + HERO
+           ============================================================ */
+        .container {
+            padding: 36px 40px 64px; max-width: 1640px; width: 100%; margin: 0 auto;
+            display: flex; flex-direction: column; gap: 30px;
+        }
+
+        .hero {
+            display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;
+            flex-wrap: wrap;
+        }
+        .hero-eyebrow {
+            font-family: var(--mono); font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase;
+            color: var(--blue); display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+        }
+        .hero-eyebrow::before { content: ""; width: 26px; height: 1px; background: var(--blue); display: inline-block; }
+        .hero h1 { font-size: 2.1rem; font-weight: 700; letter-spacing: -0.5px; color: var(--text); }
+        .hero p { color: var(--text-dim); font-size: 0.95rem; margin-top: 8px; max-width: 560px; }
+        .hero-clock {
+            text-align: right; font-family: var(--mono);
+            background: var(--glass); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 12px 18px;
+        }
+        .hero-clock .lbl { font-size: 0.6rem; letter-spacing: 1.6px; color: var(--text-faint); text-transform: uppercase; }
+        .hero-clock .val { font-size: 1.25rem; color: var(--text); font-weight: 600; }
+
+        /* Section heading */
+        .section-head { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+        .section-head .label {
+            font-family: var(--mono); font-size: 0.72rem; color: var(--text-dim);
+            letter-spacing: 1.6px; text-transform: uppercase; white-space: nowrap;
+        }
+        .section-head .accent { color: var(--blue); }
+        .section-head .ruler { flex: 1; height: 1px; background: linear-gradient(90deg, var(--border-strong), transparent); }
+
+        /* ============================================================
+           STAT / METRIC CARDS
+           ============================================================ */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+        .stat-card {
+            background: linear-gradient(160deg, var(--glass-strong), var(--glass));
+            border: 1px solid var(--border);
+            padding: 24px; border-radius: var(--radius);
+            backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+            position: relative; overflow: hidden;
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .stat-card::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; }
+        .stat-card.c-blue::before  { background: linear-gradient(90deg, transparent, var(--blue), transparent); }
+        .stat-card.c-green::before { background: linear-gradient(90deg, transparent, var(--green), transparent); }
+        .stat-card.c-amber::before { background: linear-gradient(90deg, transparent, var(--amber), transparent); }
+        .stat-card.c-purple::before{ background: linear-gradient(90deg, transparent, var(--purple), transparent); }
+        .stat-card:hover { transform: translateY(-4px); border-color: var(--border-strong); box-shadow: var(--shadow); }
+        .stat-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+        .stat-sublabel { font-size: 0.78rem; color: var(--text-dim); font-weight: 500; }
+        .stat-icon { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; }
+        .stat-icon svg { width: 20px; height: 20px; }
+        .c-blue  .stat-icon { background: rgba(59,184,255,0.12);  color: var(--blue); }
+        .c-green .stat-icon { background: rgba(0,214,143,0.12);   color: var(--green); }
+        .c-amber .stat-icon { background: rgba(255,181,71,0.12);  color: var(--amber); }
+        .c-purple .stat-icon{ background: rgba(177,140,255,0.12); color: var(--purple); }
+        .stat-number { font-family: var(--mono); font-size: 2.7rem; font-weight: 600; color: var(--text); line-height: 1; letter-spacing: -1px; }
+        .stat-foot { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.8px; margin-top: 10px; }
+        .c-blue  .stat-foot { color: var(--blue); }
+        .c-green .stat-foot { color: var(--green); }
+        .c-amber .stat-foot { color: var(--amber); }
+        .c-purple .stat-foot{ color: var(--purple); }
+
+        /* ============================================================
+           GLASS PANELS + TABLES
+           ============================================================ */
+        .glass-panel {
+            background: var(--glass); border: 1px solid var(--border);
+            backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+            box-shadow: var(--shadow); border-radius: var(--radius); overflow: hidden;
+        }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        thead th {
+            position: sticky; top: 0; z-index: 1;
+            font-family: var(--mono); background: var(--surface);
+            padding: 15px 20px; font-size: 0.66rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-faint);
+            border-bottom: 1px solid var(--border-strong); white-space: nowrap;
+        }
+        td { padding: 15px 20px; border-bottom: 1px solid var(--border); font-size: 0.86rem; color: var(--text-dim); white-space: nowrap; }
+        td.num { font-family: var(--mono); color: var(--text); }
+        tbody tr:nth-child(even) td { background: rgba(255, 255, 255, 0.02); }
+        tbody tr { transition: background 0.18s ease; }
+        tbody tr:hover td { background: rgba(59, 184, 255, 0.06); }
+        tbody tr:hover td:first-child { color: var(--blue); }
+        tr:last-child td { border-bottom: none; }
+
+        /* Classification badges */
+        .badge {
+            display: inline-block; padding: 4px 11px; font-size: 0.66rem; border-radius: 999px;
+            font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 500;
+        }
+        .badge-star, .badge-Intermediate    { background: rgba(59,184,255,0.12);  color: var(--blue);   border: 1px solid rgba(59,184,255,0.35); }
+        .badge-planet, .badge-Expert         { background: rgba(0,214,143,0.12);   color: var(--green);  border: 1px solid rgba(0,214,143,0.35); }
+        .badge-galaxy, .badge-Beginner       { background: rgba(255,181,71,0.12);  color: var(--amber);  border: 1px solid rgba(255,181,71,0.35); }
+        .badge-nebula                        { background: rgba(177,140,255,0.12); color: var(--purple); border: 1px solid rgba(177,140,255,0.35); }
+
+        .empty-log { text-align: center; padding: 54px 20px; color: var(--text-faint); font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.8px; }
+
+        /* ============================================================
+           ANIMATIONS
+           ============================================================ */
+        .reveal { opacity: 0; transform: translateY(20px); animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .reveal:nth-child(1) { animation-delay: 0.05s; }
+        .reveal:nth-child(2) { animation-delay: 0.14s; }
+        .reveal:nth-child(3) { animation-delay: 0.23s; }
+        .reveal:nth-child(4) { animation-delay: 0.32s; }
+
+        @keyframes pageFade { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse {
+            0%   { box-shadow: 0 0 0 0 rgba(0,214,143,0.55); }
+            70%  { box-shadow: 0 0 0 9px rgba(0,214,143,0); }
+            100% { box-shadow: 0 0 0 0 rgba(0,214,143,0); }
+        }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 1024px) {
+            .topbar-inner { padding: 14px 24px; }
+            .container { padding: 28px 24px 48px; }
+        }
+        @media (max-width: 820px) {
+            .menu-toggle { display: grid; place-items: center; }
+            .nav-links {
+                position: absolute; top: 100%; left: 0; right: 0;
+                flex-direction: column; align-items: stretch; gap: 2px;
+                background: rgba(15, 23, 36, 0.97); border-bottom: 1px solid var(--border);
+                padding: 10px 18px 16px; display: none;
+            }
+            .nav-links.open { display: flex; }
+            .nav-links a::after { display: none; }
+            .topbar-inner { flex-wrap: wrap; }
+            .hero h1 { font-size: 1.7rem; }
+            .hero-clock { display: none; }
+        }
+        @media (max-width: 520px) {
+            .topbar-inner { padding: 12px 16px; }
+            .container { padding: 20px 16px 40px; gap: 22px; }
+            .sys-time { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Animated starfield background -->
+<canvas id="star-canvas"></canvas>
+
+<div class="main-wrapper">
+
+    <!-- ===================== TOP NAVIGATION ===================== -->
+    <div class="topbar">
+        <div class="topbar-inner">
+            <div class="brand">
+                <div class="brand-mark">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#0f1724" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>
+                </div>
+                <div class="brand-text">
+                    <b>AOMS</b>
+                    <span>Observatory Control</span>
+                </div>
+            </div>
+
+            <nav class="nav-links" id="navLinks">
+                <a href="/" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+                <a href="/objects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>Celestial Objects</a>
+                <a href="/observers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Observers</a>
+                <a href="/telescopes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m10 12-6.5 6.5M9 9l-4 4M14 6l-9 9M19.5 2.5 22 5l-7 7-3-3 7-7zM12 15l3 3"/></svg>Telescopes</a>
+                <a href="/sessions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Sessions</a>
+            </nav>
+
+            <div style="display:flex; align-items:center; gap:14px;">
+                <div class="sys-time" id="sys-time">UTC --:--:--</div>
+                <div class="status-pill"><span class="pulse-dot"></span> SYSTEMS NOMINAL</div>
+                <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <!-- ===================== HERO ===================== -->
+        <div class="hero reveal">
+            <div>
+                <div class="hero-eyebrow">Mission Control</div>
+                <h1>Observatory Command Center</h1>
+                <p>Real-time overview of catalogued objects, observer network, instrument array and logged observation sessions.</p>
+            </div>
+            <div class="hero-clock">
+                <div class="lbl">Coordinated Universal Time</div>
+                <div class="val" id="hero-clock">--:--:--</div>
+            </div>
+        </div>
+
+        <!-- ===================== METRIC CARDS ===================== -->
+        <div class="reveal">
+            <div class="section-head">
+                <span class="label"><span class="accent">//</span> System Telemetry</span>
+                <div class="ruler"></div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card c-blue">
+                    <div class="stat-top">
+                        <span class="stat-sublabel">Total Objects</span>
+                        <span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg></span>
+                    </div>
+                    <div class="stat-number" th:text="${totalObjects}">0</div>
+                    <div class="stat-foot">CELESTIAL CATALOG</div>
+                </div>
+                <div class="stat-card c-green">
+                    <div class="stat-top">
+                        <span class="stat-sublabel">Total Observers</span>
+                        <span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+                    </div>
+                    <div class="stat-number" th:text="${totalObservers}">0</div>
+                    <div class="stat-foot">OBSERVER NETWORK</div>
+                </div>
+                <div class="stat-card c-amber">
+                    <div class="stat-top">
+                        <span class="stat-sublabel">Registered Telescopes</span>
+                        <span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m10 12-6.5 6.5M9 9l-4 4M14 6l-9 9M19.5 2.5 22 5l-7 7-3-3 7-7zM12 15l3 3"/></svg></span>
+                    </div>
+                    <div class="stat-number" th:text="${totalTelescopes}">0</div>
+                    <div class="stat-foot">INSTRUMENT ARRAY</div>
+                </div>
+                <div class="stat-card c-purple">
+                    <div class="stat-top">
+                        <span class="stat-sublabel">Active Sessions</span>
+                        <span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+                    </div>
+                    <div class="stat-number" th:text="${totalSessions}">0</div>
+                    <div class="stat-foot">OBSERVATION LOG</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================== CELESTIAL OBJECTS ===================== -->
+        <div class="reveal">
+            <div class="section-head">
+                <span class="label"><span class="accent">//</span> Deep Space Object Catalog</span>
+                <div class="ruler"></div>
+            </div>
+            <div class="glass-panel table-wrap">
+                <table th:if="${!celestialObjects.isEmpty()}">
+                    <thead>
+                    <tr>
+                        <th>Designation</th>
+                        <th>Classification</th>
+                        <th>Distance (LY)</th>
+                        <th>Visual Mag</th>
+                        <th>Constellation</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="obj : ${celestialObjects}">
+                        <td style="color:var(--text); font-weight:500;" th:text="${obj.name}"></td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${obj.type == 'Star'} ? 'badge-star' : (${obj.type == 'Planet'} ? 'badge-planet' : 'badge-galaxy')"
+                                  th:text="${obj.type}"></span>
+                        </td>
+                        <td class="num" th:text="${obj.lightYears}"></td>
+                        <td class="num" th:text="${obj.magnitude}"></td>
+                        <td th:text="${obj.constellation}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="empty-log" th:if="${celestialObjects.isEmpty()}">No object data synchronized in catalog node.</div>
+            </div>
+        </div>
+
+        <!-- ===================== OBSERVERS ===================== -->
+        <div class="reveal">
+            <div class="section-head">
+                <span class="label"><span class="accent">//</span> Registered Operator Manifest</span>
+                <div class="ruler"></div>
+            </div>
+            <div class="glass-panel table-wrap">
+                <table th:if="${!observers.isEmpty()}">
+                    <thead>
+                    <tr>
+                        <th>Operator ID</th>
+                        <th>Full Name</th>
+                        <th>Station Location</th>
+                        <th>Clearance Level</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="obs : ${observers}">
+                        <td class="num" th:text="${obs.observerID}"></td>
+                        <td style="color:var(--text); font-weight:500;" th:text="${obs.observerName}"></td>
+                        <td th:text="${obs.location}"></td>
+                        <td>
+                            <span class="badge" th:classappend="'badge-' + ${obs.experienceLevel}" th:text="${obs.experienceLevel}"></span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="empty-log" th:if="${observers.isEmpty()}">No operators registered in manifest.</div>
+            </div>
+        </div>
+
+    </div><!-- /.container -->
+</div><!-- /.main-wrapper -->
+
+<script>
+    /* ---------- Mobile nav ---------- */
+    (function () {
+        var t = document.getElementById('menuToggle');
+        var n = document.getElementById('navLinks');
+        if (t && n) t.addEventListener('click', function () { n.classList.toggle('open'); });
+    })();
+
+    /* ---------- Subtle starfield ---------- */
+    (function () {
+        var canvas = document.getElementById('star-canvas');
+        if (!canvas) return;
+        var ctx = canvas.getContext('2d');
+        var stars = [];
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            stars = [];
+            var n = Math.floor((canvas.width * canvas.height) / 11000);
+            for (var i = 0; i < n; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    r: Math.random() * 1.1 + 0.2,
+                    a: Math.random(),
+                    spd: 0.003 + Math.random() * 0.006
+                });
+            }
+        }
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (var i = 0; i < stars.length; i++) {
+                var s = stars[i];
+                s.a += s.spd;
+                if (s.a > 1 || s.a < 0) s.spd = -s.spd;
+                ctx.globalAlpha = Math.max(0, Math.min(0.9, Math.abs(s.a)));
+                ctx.fillStyle = '#dCEBFF';
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            requestAnimationFrame(draw);
+        }
+        window.addEventListener('resize', resize);
+        resize();
+        draw();
+    })();
+
+    /* ---------- UTC clock ---------- */
+    (function () {
+        function pad(n) { return n < 10 ? '0' + n : n; }
+        function tick() {
+            var now = new Date();
+            var t = pad(now.getUTCHours()) + ':' + pad(now.getUTCMinutes()) + ':' + pad(now.getUTCSeconds());
+            var a = document.getElementById('sys-time');
+            var b = document.getElementById('hero-clock');
+            if (a) a.textContent = 'UTC ' + t;
+            if (b) b.textContent = t + ' UTC';
+        }
+        tick();
+        setInterval(tick, 1000);
+    })();
+</script>
+</body>
+</html>
